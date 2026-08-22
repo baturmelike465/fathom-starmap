@@ -1,0 +1,9 @@
+{
+  "id": "fathom-starmap",
+  "name": "Fathom Starmap",
+  "version": "1.15.2",
+  "minAppVersion": "1.0.0",
+  "description": "Your vault as a living 3D galaxy \u2014 constellation nebulae, star-atlas names, time replay, ambient sound, spaceship flight, galaxy shapes, and a black hole with real gravitational lensing. Reads the vault live.",
+  "author": "Ariel Bowyer & Fathom",
+  "isDesktopOnly": true
+}
