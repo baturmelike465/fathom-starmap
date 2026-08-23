@@ -8,16 +8,16 @@ It reads your vault's own link index live — edit a note, watch a star ignite.
 
 ## Features
 
-- **A real physics galaxy** — notes repel, links attract, constellations form on their own. The layout settles, then freezes, so even huge vaults idle at full framerate.
-- **Constellations from your vault** — colored by your top-level folders, named on 3D orbital rings that wheel with the galaxy. Click a legend entry to solo one.
-- **A black hole** — notes in `Archive/` or `_to_delete/` are its meals. It has a banded accretion disk, a lensed halo, and *actual gravitational lensing*: the sky behind it visibly bends around the horizon, with a secondary inverted image inside the ring. Delete a note and watch it spiral in.
-- **Galaxy shapes** — natural, spiral, disc, ring, shell, helix, torus, clusters (each constellation drifts to its own island), cube.
-- **Spaceship flight** — press **W** to take off: mouse aims, WASD thrusts, Shift boosts, Esc lands.
-- **Time replay** — scrub the timeline and watch your vault grow star by star from its first note. Press play and let it run.
-- **Supernovas** — notes touched in the last few days pulse with a corona.
-- **Ambient soundscape** — an optional drone that echoes when you fly, with a soft blip per constellation on hover.
-- **Search** — type to find any star; the camera flies to it.
-- **A full physics + display control panel** — every force and every visual is a slider. Break it, then hit "restore defaults."
+- **A real physics galaxy** notes repel, links attract, constellations form on their own. The layout settles, then freezes, so even huge vaults idle at full framerate.
+- **Constellations from your vault** colored by your top-level folders, named on 3D orbital rings that wheel with the galaxy. Click a legend entry to solo one.
+- **A black hole** notes in `Archive/` or `_to_delete/` are its meals. It has a banded accretion disk, a lensed halo, and *actual gravitational lensing*: the sky behind it visibly bends around the horizon, with a secondary inverted image inside the ring. Delete a note and watch it spiral in.
+- **Galaxy shapes** natural, spiral, disc, ring, shell, helix, torus, clusters (each constellation drifts to its own island), cube.
+- **Spaceship flight** press **W** to take off: mouse aims, WASD thrusts, Shift boosts, Esc lands.
+- **Time replay** scrub the timeline and watch your vault grow star by star from its first note. Press play and let it run.
+- **Supernovas** notes touched in the last few days pulse with a corona.
+- **Ambient soundscape** an optional drone that echoes when you fly, with a soft blip per constellation on hover.
+- **Search** type to find any star; the camera flies to it.
+- **A full physics + display control panel** every force and every visual is a slider. Break it, then hit "restore defaults."
 
 ## The black hole
 
@@ -55,4 +55,4 @@ No network calls, no telemetry, nothing leaves your machine. The plugin reads Ob
 
 Designed and art-directed by **Ariel Bowyer**; built with **Fathom** (Claude). Black hole look inspired by [Matt Ebb's black hole render](https://mattebb.cargo.site/Black-Hole).
 
-MIT licensed — do what you like, a credit is appreciated.
+MIT licensed do what you like, a credit is appreciated.
