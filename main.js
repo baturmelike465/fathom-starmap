@@ -1,11 +1,11 @@
 /* Fathom Starmap — the vault as a living 3D galaxy, reading Obsidian's own index live. */
 'use strict';
-const { Plugin, ItemView } = require('obsidian');
+const { Plugin, ItemView, Menu } = require('obsidian');
 
 const VIEW_TYPE = 'fathom-starmap-view';
 
 // tunable settings: defaults + slider ranges (persisted via plugin data)
-// Ariel's tuned look, 2026-08-22 — "they just work SO much better visually"
+// the tuned default look, 2026-08-22 — "they just work SO much better visually"
 const DEF = {repel:2600, spring:0.020, len:80, center:0.00030, heat:0, warp:0, shape:'disc',
   nodeSize:0.4, glow:2, nebula:0.35, linkAlpha:0.85, linkW:0.8, hue:0, twinkle:2.5, dust:0.85, stars:2.5, nameSize:0.85, names:2, novas:2, hole:2,
   spin:1, comets:250, meteors:10, thrust:1, vol:1};
@@ -212,7 +212,7 @@ class StarmapView extends ItemView {
     let nodes=[], links=[], idx={}, dates=[], anchors=[];
     // the black hole: a world-space object off the galaxy's rim (Archive + _to_delete).
     // Purely decorative — it exerts NO force on live stars, so the layout
-    // Ariel signed off on cannot be disturbed by it.
+    // signed off on: cannot be disturbed by it.
     const hole={x:0,y:0,z:0,tx:0,ty:0,tz:0,n:0,init:false,scr:0,sx:0,sy:0,ss:1,sd:0,near:false,nf:1};
     const dying=[];   // stars mid-spiral into the hole (notes that left the vault)
     const FC = f => FAMS[f];
@@ -983,6 +983,7 @@ class StarmapView extends ItemView {
       } else {tip.style.display='none';canvas.style.cursor='grab';lastBlip=-1;}
     });
     canvas.addEventListener('pointerdown',e=>{
+      if(e.button===2){dragging=false;return;}   // right-click never starts a drag — it opens the star menu
       if(tour) tourStop();
       canvas.setPointerCapture(e.pointerId);
       const m=rel(e);
@@ -1012,6 +1013,22 @@ class StarmapView extends ItemView {
       targetZoom=Math.min(ZMAX,Math.max(ZMIN,targetZoom*(e.deltaY<0?1.1:0.9)));},{passive:false});
     canvas.addEventListener('pointerleave',()=>{hover=-1;tip.style.display='none';});
     canvas.addEventListener('dblclick',()=>{exitFlight();focusIdx=-1;targetZoom=1;});
+    // right-click a star → the same native menu the graph view gives (open, rename, delete, plugins…)
+    canvas.addEventListener('contextmenu',e=>{
+      e.preventDefault();
+      const m=rel(e);
+      const hit=pick(m.x,m.y);
+      if(hit<0||!nodes[hit].p) return;
+      const file=app.vault.getAbstractFileByPath(nodes[hit].p);
+      if(!file) return;
+      tip.style.display='none';
+      const menu=new Menu();
+      menu.addItem(it=>it.setTitle('Open').setIcon('file').onClick(()=>app.workspace.openLinkText(nodes[hit].p,'',false)));
+      menu.addItem(it=>it.setTitle('Open in new tab').setIcon('file-plus').onClick(()=>app.workspace.openLinkText(nodes[hit].p,'',true)));
+      menu.addSeparator();
+      app.workspace.trigger('file-menu',menu,file,'fathom-starmap');
+      menu.showAtPosition({x:e.clientX,y:e.clientY});
+    });
 
     // flight keys — only when the mouse is over the starmap (or already flying)
     const keys=new Set();
@@ -1048,7 +1065,7 @@ class StarmapView extends ItemView {
         // the time-warp slider governs — 0 (the default) freezes physics dead,
         // which is what makes 5000-note vaults run like a dream
         let effWarp=S.warp;
-        // shapes form at double speed — "the spiral takes too long" (Ariel)
+        // shapes form at double speed — "the spiral takes too long"
         if(alpha>0.12) effWarp=Math.max((S.shape||'natural')!=='natural'?2:1,effWarp);
         else if(reduceMotion) effWarp=0;
         else if(S.heat>0.01) effWarp=Math.max(1,effWarp);   // boiling needs steps
