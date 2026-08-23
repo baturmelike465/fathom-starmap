@@ -72,7 +72,7 @@ const CSS = `
 .fsm-cart h1{font-family:Georgia,serif;font-weight:400;font-style:italic;font-size:clamp(20px,3vw,32px);color:#F2F6FF;margin:0;line-height:1.05}
 .fsm-cart h1 em{color:#2EE6C8}
 .fsm-cart p{margin:6px 0 0;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#55648A}
-.fsm-legend{position:absolute;left:22px;bottom:56px;z-index:2;display:flex;flex-direction:column;gap:6px;font-size:10px;letter-spacing:.06em}
+.fsm-legend{position:absolute;left:22px;bottom:56px;z-index:2;display:flex;flex-direction:column;gap:6px;font-size:10px;letter-spacing:.06em;max-height:46vh;overflow-y:auto;scrollbar-width:thin;padding-right:6px}
 .fsm-legend .fsm-row{display:flex;align-items:center;gap:8px;color:#93A3C2;cursor:pointer;user-select:none;transition:opacity .25s}
 .fsm-legend .fsm-row.fsm-off{opacity:.28}
 .fsm-legend .fsm-dot{width:8px;height:8px;border-radius:50%;flex:none}
@@ -269,14 +269,22 @@ class StarmapView extends ItemView {
             if(!n.p||n.p.indexOf('/')<0)continue;
             const f=n.p.split('/')[0]; folders[f]=(folders[f]||0)+1;
           }
-          const top=Object.keys(folders).sort((a,b)=>folders[b]-folders[a]).slice(0,FAMORDER.length);
-          const fmap={}; top.forEach((f,i)=>{fmap[f]=FAMORDER[i]; FAMS[FAMORDER[i]].dispName=f;});
-          if(!fmap[top[6]]) FAMS.core.dispName='root notes';
+          // EVERY top-level folder gets its own constellation — no cap.
+          // The biggest folders ride the seven hand-tuned colors; each one
+          // after that mints its own family (see ensureFam), with a color
+          // spaced round the wheel. Loose root notes stay 'core'.
+          const top=Object.keys(folders).sort((a,b)=>folders[b]-folders[a]);
+          const slots=FAMORDER.filter(k=>k!=='core');
+          const fmap={};
+          top.forEach((f,i)=>{
+            const k=i<slots.length?slots[i]:view.ensureFam('dyn'+(i-slots.length));
+            fmap[f]=k; FAMS[k].dispName=f;
+          });
+          FAMS.core.dispName=top.length?'root notes':'notes';
           for(const n of nodes){
             const f=(n.p&&n.p.indexOf('/')>=0)?n.p.split('/')[0]:null;
             n.fam=(f&&fmap[f])?fmap[f]:'core';
           }
-          if(!top.length) FAMS.core.dispName='notes';
         }
         // legend follows whichever naming is live
         view.famCounts={}; for(const n of nodes) view.famCounts[n.fam]=(view.famCounts[n.fam]||0)+1;
@@ -364,7 +372,8 @@ class StarmapView extends ItemView {
     const legend=$('.fsm-legend');
     view.rebuildLegend=()=>{
       legend.innerHTML=''; famSolo=null;
-      for(const k of ['core','echo','chat','ambient','clicky','graphify','venture']){
+      const lFams=['core'].concat((view.famOrder||FAMORDER).filter(x=>x!=='core'));
+      for(const k of lFams){
         if(view.famCounts&&!view.famCounts[k])continue;
         const f=FAMS[k];
         const row=document.createElement('div');
@@ -436,7 +445,7 @@ class StarmapView extends ItemView {
     view.applyVol=()=>{ if(AC&&droneGain&&soundOn) droneGain.gain.setTargetAtTime(0.9*S.vol, AC.currentTime, 0.4); };
     const blip=fam=>{
       if(!soundOn||!AC||AC.state!=='running') return;
-      const base={echo:523,core:392,chat:659,graphify:494,clicky:440,ambient:587,venture:349}[fam]||480;
+      const base=(FAMS[fam]&&FAMS[fam].snd)||480;   // set per-family (incl. dynamic ones)
       const o=AC.createOscillator(); o.type='sine';
       o.frequency.setValueAtTime(base,AC.currentTime);
       o.frequency.exponentialRampToValueAtTime(base*0.97,AC.currentTime+0.9);
@@ -501,6 +510,68 @@ class StarmapView extends ItemView {
     };
     view.applyHue=applyHue;
     if(S.hue) applyHue();          // restore a saved hue on open
+    // ---- dynamic constellations: a vault can have ANY number of top-level
+    // folders. The first seven ride the hand-tuned palette above; every one
+    // after that mints its own family here — a color spaced round the wheel
+    // (golden angle, same brightness band as the hand palette), its own
+    // nebula sprites, legend row, sound note, and orbital-ring slot.
+    const hslCol=(h,s2,l)=>{
+      const a=s2*Math.min(l,1-l);
+      const f=n=>{const kk=(n+h/30)%12;return Math.round((l-a*Math.max(-1,Math.min(kk-3,9-kk,1)))*255);};
+      const r=f(0),g=f(8),b=f(4);
+      return {css:'#'+[r,g,b].map(x=>x.toString(16).padStart(2,'0')).join(''),rgb:r+','+g+','+b};
+    };
+    view.famOrder=FAMORDER.slice();
+    // the exact hover-blip notes the seven built-ins have always had, extended
+    const PENTA=[523,659,587,440,494,349,392,330,698,262,784,415];
+    FAMORDER.forEach((k,i)=>{FAMS[k].snd=PENTA[i];});
+    // each new constellation takes the hue FARTHEST from every color already
+    // in the sky (hand palette + earlier dynamics), so gaps fill in optimally;
+    // choices are cached by mint order, so a family's color never shifts.
+    const hueOfHex=hx=>{
+      const r=parseInt(hx.slice(1,3),16)/255,g=parseInt(hx.slice(3,5),16)/255,b=parseInt(hx.slice(5,7),16)/255;
+      const mx=Math.max(r,g,b),mn=Math.min(r,g,b);if(mx===mn)return 0;const d=mx-mn;
+      let h=mx===r?((g-b)/d+(g<b?6:0)):mx===g?((b-r)/d+2):((r-g)/d+4);return h*60;
+    };
+    const rgbDist=(a,b)=>{const p=a.split(',').map(Number),q=b.split(',').map(Number);
+      return Math.hypot(p[0]-q[0],p[1]-q[1],p[2]-q[2]);};
+    const dynCols=[];                 // cached by mint order — colors never shift
+    const dynColFor=di=>{
+      while(dynCols.length<=di){
+        const used=FAMORDER.map(x=>hueOfHex(BASEPAL[x]||FAMS[x].color))
+                           .concat(dynCols.map(c=>c.hue));
+        let bestH=0,bestGap=-1;
+        for(let h=0;h<360;h+=3){
+          let mg=360;
+          for(const u of used){let g2=Math.abs(h-u)%360;if(g2>180)g2=360-g2;if(g2<mg)mg=g2;}
+          if(mg>bestGap){bestGap=mg;bestH=h;}
+        }
+        // then the brightness weight that lands farthest from every color so far
+        const others=FAMORDER.map(x=>FAMS[x].rgb).concat(dynCols.map(c=>c.rgb));
+        let best=null,bestD=-1;
+        for(const [s2,l] of [[0.68,0.63],[0.50,0.72],[0.80,0.53]]){
+          const cand=hslCol(bestH,s2,l);
+          let mn=1e9; for(const o of others){const d2=rgbDist(cand.rgb,o);if(d2<mn)mn=d2;}
+          if(mn>bestD){bestD=mn;best=cand;}
+        }
+        best.hue=bestH; dynCols.push(best);
+      }
+      return dynCols[di];
+    };
+    view.ensureFam=k=>{
+      if(FAMS[k])return k;
+      const di=view.famOrder.length-FAMORDER.length;   // dynamics minted so far
+      const col=dynColFor(di);
+      FAMS[k]={name:k,color:col.css,rgb:col.rgb,seeds:[],
+               snd:PENTA[(FAMORDER.length+di)%PENTA.length]*(di>=PENTA.length?0.5:1)};
+      BASEPAL[k]=col.css;
+      if(S.hue){const r2=rotHue(col.css,S.hue);FAMS[k].color=r2.css;FAMS[k].rgb=r2.rgb;}
+      puffs[k]=makePuff(FAMS[k].color);
+      glows[k]=makeGlowSprite(FAMS[k].color);
+      view.famOrder.push(k);
+      if(view.famF)view.famF[k]=0;
+      return k;
+    };
     // backdrop stars are REAL 3D points on a distant sphere — they move through the
     // same camera as everything else (the old flat parallax layer slid wrongly)
     const stars=[];
@@ -558,7 +629,7 @@ class StarmapView extends ItemView {
         if(!view.clR) view.clR=shpR||1;
         const CR=view.clR*1.6;
         clC={}; let ci=0;
-        for(const k of FAMORDER){const ca=ci*2.399;
+        for(const k of (view.famOrder||FAMORDER)){const ca=ci*2.399;
           clC[k]=[Math.cos(ca)*CR, (((ci%3)-1))*CR*0.45, Math.sin(ca)*CR]; ci++;}
       }
       for(const n of nodes){
@@ -724,9 +795,10 @@ class StarmapView extends ItemView {
     };
     const tourStop=()=>{tour=null;tourBtn.innerHTML='&#10022;';focusIdx=-1;targetZoom=1;hideCaption();};
     const tourGo=step=>{
-      if(step>=FAMORDER.length){tourStop();showCaption('Fathom <em>Starmap</em>','end of tour',3600);return;}
+      const TO=['core'].concat((view.famOrder||FAMORDER).filter(x=>x!=='core'));
+      if(step>=TO.length){tourStop();showCaption('Fathom <em>Starmap</em>','end of tour',3600);return;}
       tour={step,hold:0};
-      const k=['core','echo','chat','ambient','clicky','graphify','venture'][step], s=famStats(k);
+      const k=TO[step], s=famStats(k);
       if(!s.hub){tourGo(step+1);return;}
       focusIdx=nodes.indexOf(s.hub); targetZoom=1.8;
       showCaption(FNAME(k), s.count+' notes · '+s.links+' internal links', 0);
@@ -966,7 +1038,7 @@ class StarmapView extends ItemView {
     // ---- render ----
     const order=()=>nodes.map((_,i)=>i).sort((a,b)=>(nodes[b].r-nodes[a].r)||(a-b));
     let ord=order();
-    const famF={}; for(const k in FAMS) famF[k]=0;   // eased per-family fade for hover
+    const famF={}; view.famF=famF; for(const k in FAMS) famF[k]=0;   // eased per-family fade for hover; ensureFam adds new keys
     let t0=performance.now();
     const frame=now=>{
       if(view.dead) return;
@@ -997,7 +1069,12 @@ class StarmapView extends ItemView {
           vel.x*=0.965;vel.y*=0.965;vel.z*=0.965;
           cam.x+=vel.x;cam.y+=vel.y;cam.z+=vel.z;
         } else {
-          const tgt = focusIdx>=0 ? nodes[focusIdx] : {x:0,y:0,z:0};
+          // aim at the LIVE centre of the visible stars, not the world origin —
+          // a drifted layout can leave the origin in empty space (the galaxy
+          // then sits off in a screen corner with no way to recenter). This
+          // keeps the galaxy centered always: through drift, time replay, and
+          // constellation solo (the camera glides to the soloed constellation).
+          const tgt = focusIdx>=0 ? nodes[focusIdx] : (view.gCtr||{x:0,y:0,z:0});
           ctr.x+=(tgt.x-ctr.x)*0.06; ctr.y+=(tgt.y-ctr.y)*0.06; ctr.z+=(tgt.z-ctr.z)*0.06;
         }
         if(tour){ tour.hold++; if(tour.hold>(reduceMotion?90:420)) tourGo(tour.step+1); }
@@ -1100,7 +1177,7 @@ class StarmapView extends ItemView {
         // whole-galaxy bounds: names sit on the OUTSKIRTS, at their sector's direction
         let gcx=0,gcy=0,gcz=0,gn=0;
         for(const n of nodes){ if(hiddenN(n))continue; gcx+=n.x;gcy+=n.y;gcz+=n.z;gn++; }
-        if(gn){gcx/=gn;gcy/=gn;gcz/=gn;}
+        if(gn){gcx/=gn;gcy/=gn;gcz/=gn; view.gCtr={x:gcx,y:gcy,z:gcz};}   // live galaxy centre — the camera's true home
         const gdist=[]; for(const n of nodes){ if(hiddenN(n))continue; gdist.push(Math.hypot(n.x-gcx,n.y-gcy,n.z-gcz)); }
         gdist.sort((a,b)=>a-b);
         const Rg=gdist[Math.floor(gdist.length*0.85)]||100;
@@ -1136,12 +1213,15 @@ class StarmapView extends ItemView {
               let c3x=0,c3y=0,c3z=0,twt=0;
               for(const n of mem){const wgt=1+n.w;c3x+=n.x*wgt;c3y+=n.y*wgt;c3z+=n.z*wgt;twt+=wgt;}
               c3x/=twt;c3y/=twt;c3z/=twt;
-              const idxF=Math.max(0,FAMORDER.indexOf(k));
-              const inc=(idxF-3)*0.20;          // this ring's tilt out of the galaxy plane
+              const FOA=view.famOrder||FAMORDER;
+              const idxF=Math.max(0,FOA.indexOf(k));
+              const inc=((idxF%7)-3)*0.20;      // this ring's tilt out of the galaxy plane
               const nodA=idxF*2.399;            // where its tilt axis points (golden angle)
               const ux=Math.cos(nodA), uz=Math.sin(nodA);
               const vx=-Math.sin(nodA)*Math.cos(inc), vy=Math.sin(inc), vz=Math.cos(nodA)*Math.cos(inc);
-              const R3=Rg*1.24+20+idxF*9;       // each ring a little wider than the last
+              // each ring a little wider than the last; with many constellations
+              // the spacing tightens so the outermost ring stays close to home
+              const R3=Rg*1.24+20+idxF*Math.min(9,63/Math.max(7,FOA.length-1));
               const scRef=gP.ss;
               const fs=Math.max(9,Math.min(30,Rg*scRef*0.115))*S.nameSize;
               if(fs>9.5){
