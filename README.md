@@ -37,7 +37,7 @@ One click reshapes your entire vault: natural, spiral, disc, ring, shell, helix,
 
 1. Download `main.js` and `manifest.json` from this repo (or grab the latest release).
 2. In your vault, create the folder `.obsidian/plugins/fathom-starmap/` and put both files inside.
-   (`.obsidian` is hidden — on macOS press `Cmd+Shift+.` in Finder to see it.)
+   (`.obsidian` is hidden on macOS press `Cmd+Shift+.` in Finder to see it.)
 3. In Obsidian: **Settings → Community plugins** → turn off Restricted mode if it's on → enable **Fathom Starmap**.
 4. Click the star in the left ribbon.
 
@@ -45,11 +45,11 @@ One click reshapes your entire vault: natural, spiral, disc, ring, shell, helix,
 
 ## Performance, honestly
 
-The layout physics is O(n²) — every star pushes on every other star. The plugin handles this by forming the galaxy once and then **freezing the physics** (time warp defaults to 0), so after the opening settle even a 5,000-note vault renders at full framerate. If you turn time warp up on a vault past ~1,500 notes, expect the simulation itself to get heavy. Tested on real 2,000- and 5,000-note vaults.
+The layout physics is O(n²) every star pushes on every other star. The plugin handles this by forming the galaxy once and then **freezing the physics** (time warp defaults to 0), so after the opening settle even a 5,000-note vault renders at full framerate. If you turn time warp up on a vault past ~1,500 notes, expect the simulation itself to get heavy. Tested on real 2,000- and 5,000-note vaults.
 
 ## Privacy
 
-No network calls, no telemetry, nothing leaves your machine. The plugin reads Obsidian's own link index and note metadata (names, folders, sizes, dates) to draw the map — it never reads note contents.
+No network calls, no telemetry, nothing leaves your machine. The plugin reads Obsidian's own link index and note metadata (names, folders, sizes, dates) to draw the map it never reads note contents.
 
 ## Credits
 
