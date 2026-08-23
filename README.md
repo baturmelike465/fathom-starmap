@@ -2,7 +2,7 @@
 
 **Your Obsidian vault as a living 3D galaxy.** Every note is a star. Folders and hub notes become colored constellations wrapped in nebula fog, with their names wheeling on tilted orbital rings. Links are threads of light. Archived notes fall into a black hole that bends the light behind it.
 
-It reads your vault's own link index live — edit a note, watch a star ignite.
+It reads your vault's own link index live edit a note, watch a star ignite.
 
 ![Fathom Starmap](images/disc.jpg)
 
