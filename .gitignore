@@ -1,0 +1,27 @@
+# Build output (main.js is the built artifact, committed for Obsidian/BRAT)
+# main.js — intentionally tracked: Obsidian loads it directly
+
+# Dependencies
+node_modules/
+
+# Build artifacts
+dist/
+*.tsbuildinfo
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Debug
+npm-debug.log*
+
+# Environment
+.env
+.env.*
