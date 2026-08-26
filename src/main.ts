@@ -14,6 +14,7 @@ import { project, lensPoint } from './logic/projection';
 import { ensureFam as ensureFamFn } from './logic/palette';
 import { createSoundEngine } from './audio/soundscape';
 import type { StarNode, StarLink, BlackHole, DyingNode, Projectable, BackdropStar, Particle, CameraState } from './types';
+import { exportWallpaper } from './wallpaper/export';
 
 class StarmapView extends ItemView {
   plugin: FathomStarmapPlugin;
@@ -33,8 +34,16 @@ class StarmapView extends ItemView {
 
   buildData(){
     const app = this.app;
-    const files = app.vault.getMarkdownFiles().filter(f =>
-      !/^(_to_delete|copilot|Archive)\//.test(f.path) && !f.path.split('/').some(s=>s.startsWith('.')));
+    const exList = (this.S && this.S.exclude || '').split(',').map(s=>s.trim().toLowerCase()).filter(Boolean);
+    const files = app.vault.getMarkdownFiles().filter(f =>{
+      if(/^(_to_delete|copilot|Archive)\//.test(f.path)) return false;
+      if(f.path.split('/').some(s=>s.startsWith('.'))) return false;
+      if(exList.length){
+        const top = f.path.split('/')[0].toLowerCase();
+        if(exList.some(ex => top === ex)) return false;
+      }
+      return true;
+    });
     const byPath = {}, nodes = [];
     // 'log' notes (journals, session logs, dailies) render as smaller ember
     // stars; everything else is a full star. Detected by top-level folder name.
@@ -388,6 +397,8 @@ class StarmapView extends ItemView {
     };
     rebuildParticles();
     view.rebuildParticles=rebuildParticles;
+    // expose live data for wallpaper export
+    view.getGraphData=()=>({nodes,links,S});
 
     // ---- physics (constants live in S so the settings panel can tune them) ----
     let alpha=1;
@@ -561,16 +572,30 @@ class StarmapView extends ItemView {
         shRow.appendChild(b); shBtns[nm]=b;
       }
       panel.appendChild(shRow); paintShapes();
+      // ---- exclude folders ----
+      const exHead=document.createElement('h4'); exHead.textContent='exclude folders'; panel.appendChild(exHead);
+      const exRow=document.createElement('div'); exRow.className='fsm-prow';
+      exRow.innerHTML='<div class="fsm-plbl"><span>folder names (comma-separated)</span></div>';
+      const exInp=document.createElement('input');
+      exInp.type='text'; exInp.value=S.exclude||'';
+      exInp.placeholder='e.g. templates, daily, archive';
+      exInp.style.cssText='width:100%;background:rgba(20,25,40,.6);border:1px solid rgba(120,140,185,.3);color:#c8d0e0;padding:5px 8px;border-radius:4px;font-size:12px;margin-top:4px;';
+      exInp.addEventListener('change',()=>{
+        S.exclude=exInp.value; save(); loadData();
+      });
+      exRow.appendChild(exInp); panel.appendChild(exRow);
       const reset=document.createElement('button');
       reset.className='fsm-preset'; reset.textContent='restore defaults';
       reset.addEventListener('click',()=>{
         Object.assign(S,DEF);
         for(const sl of SLIDERS){inputs[sl.key].inp.value=String(S[sl.key]);inputs[sl.key].val.textContent=fmt(sl.key,S[sl.key]);}
+        exInp.value=S.exclude||'';
         alpha=1;
         paintShapes();
         if(view.applyHue)view.applyHue();
         if(view.rebuildParticles)view.rebuildParticles();
         if(view.applyVol)view.applyVol();
+        loadData();
         save();
       });
       panel.appendChild(reset);
@@ -664,7 +689,7 @@ class StarmapView extends ItemView {
     canvas.addEventListener('wheel',e=>{e.preventDefault();
       targetZoom=Math.min(ZMAX,Math.max(ZMIN,targetZoom*(e.deltaY<0?1.1:0.9)));},{passive:false});
     canvas.addEventListener('pointerleave',()=>{hover=-1;tip.style.display='none';});
-    canvas.addEventListener('dblclick',()=>{exitFlight();focusIdx=-1;targetZoom=1;});
+    canvas.addEventListener('dblclick',()=>{exitFlight();focusIdx=-1;targetZoom=1;targetYaw=0.4;targetPitch=0.18;});
     // right-click a star → the same native menu the graph view gives (open, rename, delete, plugins…)
     canvas.addEventListener('contextmenu',e=>{
       e.preventDefault();
@@ -709,9 +734,24 @@ class StarmapView extends ItemView {
     let ord=order();
     const famF={}; view.famF=famF; for(const k in FAMS) famF[k]=0;   // eased per-family fade for hover; ensureFam adds new keys
     let t0=performance.now();
+    // PERF: idle-frame throttling — when nothing is actively changing, skip
+    // every other frame (30fps). The galaxy still twinkles and spins but uses
+    // roughly half the CPU/GPU. Any interaction instantly restores 60fps.
+    let skipNext=false, idleFrames=0;
     const frame=now=>{
       if(view.dead) return;
       const t=(now-t0)/1000;
+      // decide whether the galaxy is "idle" — settled physics, no interaction
+      const isIdle = alpha<0.005 && !dragging && !flightMode && hover<0
+        && !playing && !tour && S.warp===0 && S.heat<0.01
+        && focusIdx<0 && dying.length===0;
+      if(isIdle) idleFrames++; else idleFrames=0;
+      // after 60 idle frames (~1s) start skipping every other frame → ~30fps
+      // with prefers-reduced-motion: render only every 3rd frame → ~20fps
+      if(idleFrames>60){
+        const skip = reduceMotion ? (idleFrames%3!==0) : (idleFrames%2!==0);
+        if(skip){ view.rafId=requestAnimationFrame(frame); return; }
+      }
       if(nodes.length){
         // settle-then-freeze: the galaxy always forms itself (alpha hot), then
         // the time-warp slider governs — 0 (the default) freezes physics dead,
@@ -744,7 +784,9 @@ class StarmapView extends ItemView {
           // keeps the galaxy centered always: through drift, time replay, and
           // constellation solo (the camera glides to the soloed constellation).
           const tgt = focusIdx>=0 ? nodes[focusIdx] : (view.gCtr||{x:0,y:0,z:0});
-          ctr.x+=(tgt.x-ctr.x)*0.06; ctr.y+=(tgt.y-ctr.y)*0.06; ctr.z+=(tgt.z-ctr.z)*0.06;
+          // 12% per frame gives a smooth but noticeably quicker recenter than 6%
+          const ease = 0.12;
+          ctr.x+=(tgt.x-ctr.x)*ease; ctr.y+=(tgt.y-ctr.y)*ease; ctr.z+=(tgt.z-ctr.z)*ease;
         }
         if(tour){ tour.hold++; if(tour.hold>(reduceMotion?90:420)) tourGo(tour.step+1); }
         if(playing){
@@ -814,6 +856,7 @@ class StarmapView extends ItemView {
             const ang=h1*6.283+(reduceMotion?0:t*0.03*(h2-0.5));
             const dist=baseR*(0.15+h2*0.75), R=baseR*(0.55+h3*0.9);
             const a=(0.09-0.04*fd)*S.nebula*(0.6+0.4*Math.sin(t*0.2+h1*6.283))*(n.nf===undefined?1:n.nf);
+            if(a<0.009)continue;   // PERF: skip invisible puffs
             fogCtx.globalAlpha=Math.max(0.008,a);
             fogCtx.drawImage(sprite,n.sx+Math.cos(ang)*dist-R,n.sy+Math.sin(ang)*dist-R,R*2,R*2);
           }
@@ -873,6 +916,8 @@ class StarmapView extends ItemView {
             });
             ctx.closePath();ctx.stroke();
             ctx.setLineDash([]);
+            // PERF: skip the expensive per-letter 3D orbit names when the slider is off
+            if(S.names<0.02) continue;
             // --- 3D ORBIT NAME: each sector's title lives on its own tilted ring
             // around the whole galaxy, like planets on different orbital planes.
             // Fixed in world space at its sector's bearing; it wheels with rotation,
@@ -1081,7 +1126,8 @@ class StarmapView extends ItemView {
                 // build the warped sky in an offscreen buffer: 96 fine slices,
                 // then composite back through a 1px blur that fuses the steps
                 // (and reads as gravitational heat-haze)
-                const NR=96, inR=thE*1.02, sw=LR*2*DPR;
+                // PERF: fewer warp rings when the hole is small on screen
+                const NR=R0>40?96:R0>20?64:32, inR=thE*1.02, sw=LR*2*DPR;
                 const rg=x=>inR+(LR-inR)*Math.pow(x,1.7);   // densest at the ring
                 w2c.clearRect(0,0,LR*2,LR*2);
                 for(let ri=0;ri<NR;ri++){
@@ -1136,7 +1182,8 @@ class StarmapView extends ItemView {
             // Butt-capped exact segments: overlap + additive blending was
             // stamping bright tick marks at every joint (seen in test shots).
             ctx.rotate(TILT);
-            const SEG=60, TAU=6.28319;
+            // PERF: fewer arc segments when the hole is small
+            const SEG=R0>30?60:R0>15?36:20, TAU=6.28319;
             for(let si=0;si<SEG;si++){
               const a0=(si/SEG)*TAU, a1=((si+1)/SEG)*TAU;
               const am=(a0+a1)/2;
@@ -1487,12 +1534,38 @@ export default class FathomStarmapPlugin extends Plugin {
     this.registerView(VIEW_TYPE, (leaf: WorkspaceLeaf) => new StarmapView(leaf, this));
     this.addRibbonIcon('star','Fathom Starmap',()=>this.activate());
     this.addCommand({id:'open-fathom-starmap', name:'Open starmap', callback:()=>this.activate()});
+    this.addCommand({id:'export-wallpaper', name:'Export starmap as desktop wallpaper', callback:()=>this.exportWallpaper()});
   }
   async activate(){
     const {workspace}=this.app;
     let leaf = workspace.getLeavesOfType(VIEW_TYPE)[0];
     if(!leaf){ leaf=workspace.getLeaf(true); await leaf.setViewState({type:VIEW_TYPE, active:true}); }
     workspace.revealLeaf(leaf);
+  }
+  async exportWallpaper(){
+    // find the active starmap view
+    const leaf = this.app.workspace.getLeavesOfType(VIEW_TYPE)[0];
+    if(!leaf){ new (require('obsidian') as any).Notice('Open the starmap first, then export.'); return; }
+    const view = leaf.view as StarmapView;
+    const data = view.getGraphData?.();
+    if(!data || !data.nodes?.length){
+      new (require('obsidian') as any).Notice('Starmap has no data yet — wait for it to load.');
+      return;
+    }
+    const html = exportWallpaper(data.nodes, data.links, data.S);
+    // write the HTML file into the vault root
+    const path = 'fathom-wallpaper.html';
+    try {
+      const exists = this.app.vault.getAbstractFileByPath(path);
+      if(exists) await this.app.vault.modify(exists as any, html);
+      else await this.app.vault.create(path, html);
+      new (require('obsidian') as any).Notice(
+        'Wallpaper saved to ' + path + '\n\nPoint a wallpaper app (Plash, Wallpaper Engine, etc.) at this file.',
+        8000
+      );
+    } catch(e) {
+      new (require('obsidian') as any).Notice('Failed to save wallpaper: ' + (e as Error).message);
+    }
   }
   onunload(){}
 }

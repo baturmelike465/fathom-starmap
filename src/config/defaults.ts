@@ -7,5 +7,6 @@ export const DEF: Record<string, any> = {
   nodeSize: 0.4, glow: 2, nebula: 0.35, linkAlpha: 0.85, linkW: 0.8,
   hue: 0, twinkle: 2.5, dust: 0.85, stars: 2.5,
   nameSize: 0.85, names: 2, novas: 2, hole: 2,
-  spin: 1, comets: 250, meteors: 10, thrust: 1, vol: 1
+  spin: 1, comets: 250, meteors: 10, thrust: 1, vol: 1,
+  exclude: ''
 };
